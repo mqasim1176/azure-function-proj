@@ -1,0 +1,61 @@
+name: Azure Functions CI
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+  pull_request:
+    branches:
+      - main
+      - staging
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-validate:
+    name: Build and Validate Function
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate project structure
+        run: |
+          test -f host.json
+          test -f package.json
+          test -f src/functions/HealthCheck.js
+          echo "Function project files found."
+
+      - name: Build project if configured
+        run: npm run build --if-present
+
+      - name: Run tests if configured
+        run: npm test --if-present
+
+      - name: Check dependency vulnerabilities
+        run: npm audit --audit-level=high
+
+      - name: Upload source artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ams-functions-source
+          path: |
+            host.json
+            package.json
+            package-lock.json
+            src/**
+          if-no-files-found: error
+          retention-days: 7
