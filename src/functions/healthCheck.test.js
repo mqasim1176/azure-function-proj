@@ -7,6 +7,6 @@ test("HealthCheck returns HTTP 200 and Healthy status", async () => {
 
   assert.equal(response.status, 200);
   assert.deepEqual(response.jsonBody, {
-    status: "Not Healthy"
+    status: "Healthy"
   });
 });
