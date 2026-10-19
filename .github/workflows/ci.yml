@@ -48,7 +48,8 @@ jobs:
       - name: Prepare deployment package
         run: |
           mkdir -p release
-          cp -r host.json package.json src release/
+          cp host.json package.json package-lock.json release/
+          cp -r src release/
           npm ci --omit=dev --prefix release
 
       - name: Upload deployment artifact
