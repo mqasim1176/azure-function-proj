@@ -59,3 +59,25 @@ jobs:
             src/**
           if-no-files-found: error
           retention-days: 7
+  deploy:
+    name: Validate deployment artifact
+    runs-on: ubuntu-latest
+    needs: build-and-validate
+
+    steps:
+      - name: Download deployment artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: function-package
+          path: downloaded-package
+
+      - name: Validate downloaded package
+        run: |
+          test -f downloaded-package/host.json
+          test -f downloaded-package/package.json
+          test -f downloaded-package/src/functions/HealthCheck.js
+          test -d downloaded-package/node_modules/@azure/functions
+          echo "Deployment artifact is ready."
+
+      - name: Show package contents
+        run: find downloaded-package -maxdepth 3 -type f | sort
